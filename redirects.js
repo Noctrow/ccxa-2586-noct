@@ -17,6 +17,7 @@ function generateShortCode(url) {
 async function loadSitemapAndGenerateRedirects() {
   try {
     const response = await fetch("https://blog.chochoxapp.com/sitemap.xml");
+    if (!response.ok) throw new Error("Error al cargar el sitemap");
     const sitemapText = await response.text();
 
     // Parsear el XML para extraer las URLs
@@ -26,12 +27,14 @@ async function loadSitemapAndGenerateRedirects() {
 
     // Iterar sobre las URLs y generar códigos cortos
     for (const urlElement of urlElements) {
-      const url = urlElement.textContent;
-      const shortCode = generateShortCode(url);
+      const url = urlElement.textContent.split("?")[0]; // Eliminar parámetros después de "?"
+      if (url && url.startsWith("http")) { // Validar que es una URL válida
+        const shortCode = generateShortCode(url);
 
-      // Si el código corto no existe en redirects, agregarlo
-      if (!redirects[shortCode]) {
-        redirects[shortCode] = url;
+        // Si el código corto no existe en redirects, agregarlo
+        if (!redirects[shortCode]) {
+          redirects[shortCode] = url;
+        }
       }
     }
 
